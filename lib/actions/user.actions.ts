@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { FilterQuery, SortOrder } from "mongoose";
 import { revalidatePath } from "next/cache";
