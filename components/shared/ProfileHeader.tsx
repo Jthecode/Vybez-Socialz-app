@@ -1,5 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
+import { MouseEvent, useState } from 'react';
+import { followUser, unfollowUser } from "@/lib/actions/user.actions";
 
 interface Props {
   accountId: string;
@@ -8,6 +10,10 @@ interface Props {
   username: string;
   imgUrl: string;
   bio: string;
+  followButtonVisible?: boolean;
+  unfollowButtonVisible?: boolean;
+  onFollow?: () => Promise<void>;
+  onUnfollow?: () => Promise<void>;
   type?: string;
 }
 
@@ -18,8 +24,41 @@ function ProfileHeader({
   username,
   imgUrl,
   bio,
+  followButtonVisible,
+  unfollowButtonVisible,
+  onFollow,
+  onUnfollow,
   type,
 }: Props) {
+  const [followLoading, setFollowLoading] = useState(false);
+  const [unfollowLoading, setUnfollowLoading] = useState(false);
+
+  const handleFollow = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (!onFollow) return;
+    try {
+      setFollowLoading(true);
+      await onFollow();
+    } catch (error) {
+      console.error('Error following user:', error);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
+  const handleUnfollow = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (!onUnfollow) return;
+    try {
+      setUnfollowLoading(true);
+      await onUnfollow();
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+    } finally {
+      setUnfollowLoading(false);
+    }
+  };
+
   return (
     <div className='flex w-full flex-col justify-start'>
       <div className='flex items-center justify-between'>
@@ -40,7 +79,7 @@ function ProfileHeader({
             <p className='text-base-medium text-gray-1'>@{username}</p>
           </div>
         </div>
-        {accountId === authUserId && type !== "Community" && (
+        {accountId === authUserId && type !== 'Community' && (
           <Link href='/profile/edit'>
             <div className='flex cursor-pointer gap-3 rounded-lg bg-dark-3 px-4 py-2'>
               <Image
@@ -53,6 +92,16 @@ function ProfileHeader({
               <p className='text-light-2 max-sm:hidden'>Edit</p>
             </div>
           </Link>
+        )}
+        {followButtonVisible && (
+          <button onClick={handleFollow} className={`btn ${followLoading ? 'disabled' : ''}`} disabled={followLoading}>
+            {followLoading ? 'Following...' : 'Follow'}
+          </button>
+        )}
+        {unfollowButtonVisible && (
+          <button onClick={handleUnfollow} className={`btn ${unfollowLoading ? 'disabled' : ''}`} disabled={unfollowLoading}>
+            {unfollowLoading ? 'Unfollowing...' : 'Unfollow'}
+          </button>
         )}
       </div>
 

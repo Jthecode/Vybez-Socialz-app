@@ -8,7 +8,7 @@ import ThreadsTab from "@/components/shared/ThreadsTab";
 import ProfileHeader from "@/components/shared/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { fetchUser } from "@/lib/actions/user.actions";
+import { fetchUser, followUser, unfollowUser } from "@/lib/actions/user.actions"; // Import followUser and unfollowUser functions
 
 async function Page({ params }: { params: { id: string } }) {
   const user = await currentUser();
@@ -16,6 +16,22 @@ async function Page({ params }: { params: { id: string } }) {
 
   const userInfo = await fetchUser(params.id);
   if (!userInfo?.onboarded) redirect("/onboarding");
+
+  const handleFollow = async () => {
+    try {
+      await followUser(userInfo.id, user.id);
+    } catch (error) {
+      console.error('Error following user:', error);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    try {
+      await unfollowUser(userInfo.id, user.id);
+    } catch (error) {
+      console.error('Error unfollowing user:', error);
+    }
+  };
 
   return (
     <section>
@@ -26,6 +42,11 @@ async function Page({ params }: { params: { id: string } }) {
         username={userInfo.username}
         imgUrl={userInfo.image}
         bio={userInfo.bio}
+        // Render follow/unfollow buttons based on user's following status
+        followButtonVisible={!userInfo.followers.includes(user.id)}
+        unfollowButtonVisible={userInfo.followers.includes(user.id)}
+        onFollow={handleFollow}
+        onUnfollow={handleUnfollow}
       />
 
       <div className='mt-9'>

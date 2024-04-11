@@ -153,6 +153,24 @@ export async function fetchUsers({
   }
 }
 
+export async function followUser(userId: string, followerId: string): Promise<void> {
+  try {
+    await User.findByIdAndUpdate(userId, { $addToSet: { followers: followerId } });
+  } catch (error) {
+    console.error("Error following user:", error);
+    throw error;
+  }
+}
+
+export async function unfollowUser(userId: string, followerId: string): Promise<void> {
+  try {
+    await User.findByIdAndUpdate(userId, { $pull: { followers: followerId } });
+  } catch (error) {
+    console.error("Error unfollowing user:", error);
+    throw error;
+  }
+}
+
 export async function getActivity(userId: string) {
   try {
     connectToDB();
